@@ -37,7 +37,7 @@
     (doall (for [line (line-seq rdr)]
              (parse-record line)))))
 
-(defn add-to-current-records
+(defn add-to-current-records!
   "Add the contents of a file at the given file-path to
   the in-memory record list."
   [record-file]
