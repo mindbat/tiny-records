@@ -50,3 +50,18 @@
                   new-records))
       (is #{"wart" "owl" "mordred" "gawain" "wizard"}
           (set (map :last-name new-records))))))
+
+(deftest t-add-to-current-records
+  (testing "should add file to current records"
+    (let [file-to-parse "test/sample-pipe-delimited.txt"]
+      (rec/add-to-current-records! file-to-parse)
+      (is (= 5 (count @rec/current-records)))
+      (is (every? #(= (set rec/record-keys)
+                      (set (keys %)))
+                  @rec/current-records))
+      (is #{"wart" "owl" "mordred" "gawain" "wizard"}
+          (set (map :last-name @rec/current-records)))))
+  (testing "duplicate records should not alter the list"
+    (let [file-to-parse "test/sample-comma-delimited.txt"]
+      (rec/add-to-current-records! file-to-parse)
+      (is (= 5 (count @rec/current-records))))))
