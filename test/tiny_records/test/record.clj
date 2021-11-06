@@ -24,3 +24,29 @@
             :favorite-color "blue"
             :date-of-birth "start-of-time"}
          (rec/parse-record "wizard merlin bermuda@backwards.com blue start-of-time")))))
+
+(deftest t-parse-file
+  (testing "should be able to parse pipe-delimited files"
+    (let [new-records (rec/parse-file "test/sample-pipe-delimited.txt")]
+      (is (= 5 (count new-records)))
+      (is (every? #(= (set rec/record-keys)
+                      (set (keys %)))
+                  new-records))
+      (is #{"wart" "owl" "mordred" "gawain" "wizard"}
+          (set (map :last-name new-records)))))
+  (testing "should be able to parse comma-delimited files"
+    (let [new-records (rec/parse-file "test/sample-comma-delimited.txt")]
+      (is (= 5 (count new-records)))
+      (is (every? #(= (set rec/record-keys)
+                      (set (keys %)))
+                  new-records))
+      (is #{"wart" "owl" "mordred" "gawain" "wizard"}
+          (set (map :last-name new-records)))))
+  (testing "should be able to parse space-delimited files"
+    (let [new-records (rec/parse-file "test/sample-space-delimited.txt")]
+      (is (= 5 (count new-records)))
+      (is (every? #(= (set rec/record-keys)
+                      (set (keys %)))
+                  new-records))
+      (is #{"wart" "owl" "mordred" "gawain" "wizard"}
+          (set (map :last-name new-records))))))
