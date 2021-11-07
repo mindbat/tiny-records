@@ -1,5 +1,7 @@
 (ns tiny-records.core
   (:require [clojure.java.io :as io]
+            [doric.core :as doric]
+            [java-time :as date]
             [tiny-records.record :as rec])
   (:gen-class))
 
@@ -29,6 +31,21 @@
   (assert (.endsWith file-path ".txt")
             "File is wrong format!")
   (rec/add-to-current-records! file-path))
+
+(defn format-date-for-output
+  "Format the date of a record for output to a user."
+  [record]
+  (update record
+          :date-of-birth
+          (partial date/format "M/d/YYYY")))
+
+(defn print-current-records
+  [requested-view]
+  (assert (get rec/views->sorts requested-view false)
+   "Requested view does not exist!")
+  (println (doric/table rec/record-keys
+                        (map format-date-for-output
+                             (rec/get-sorted-records requested-view)))))
 
 (defn -main
   "I don't do a whole lot ... yet."
