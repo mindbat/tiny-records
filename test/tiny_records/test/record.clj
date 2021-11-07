@@ -3,6 +3,12 @@
             [java-time :as date]
             [tiny-records.record :as rec]))
 
+(use-fixtures :each
+  (fn [f]
+    (reset! rec/current-records #{})
+    (when f
+      (f))))
+
 (deftest t-parse-record
   (testing "should parse pipe-delimited records"
     (is (= {:last-name "owl"
@@ -29,66 +35,67 @@
 (deftest t-parse-file
   (testing "should be able to parse pipe-delimited files"
     (let [new-records (rec/parse-file "test/sample-pipe-delimited.txt")]
-      (is (= 5 (count new-records)))
+      (is (= 6 (count new-records)))
       (is (every? #(= (set rec/record-keys)
                       (set (keys %)))
                   new-records))
-      (is #{"wart" "owl" "mordred" "gawain" "wizard"}
-          (set (map :last-name new-records)))))
+      (is (= #{"wart" "the-owl" "of-the-lake" "mordred" "gawain" "wizard"}
+             (set (map :last-name new-records))))))
   (testing "should be able to parse comma-delimited files"
     (let [new-records (rec/parse-file "test/sample-comma-delimited.txt")]
-      (is (= 5 (count new-records)))
+      (is (= 6 (count new-records)))
       (is (every? #(= (set rec/record-keys)
                       (set (keys %)))
                   new-records))
-      (is #{"wart" "owl" "mordred" "gawain" "wizard"}
-          (set (map :last-name new-records)))))
+      (is (= #{"wart" "the-owl" "of-the-lake" "mordred" "gawain" "wizard"}
+             (set (map :last-name new-records))))))
   (testing "should be able to parse space-delimited files"
     (let [new-records (rec/parse-file "test/sample-space-delimited.txt")]
-      (is (= 5 (count new-records)))
+      (is (= 6 (count new-records)))
       (is (every? #(= (set rec/record-keys)
                       (set (keys %)))
                   new-records))
-      (is #{"wart" "owl" "mordred" "gawain" "wizard"}
-          (set (map :last-name new-records))))))
+      (is (= #{"wart" "the-owl" "of-the-lake" "mordred" "gawain" "wizard"}
+             (set (map :last-name new-records)))))))
 
 (deftest t-add-to-current-records
   (testing "should add file to current records"
     (let [file-to-parse "test/sample-pipe-delimited.txt"]
       (rec/add-to-current-records! file-to-parse)
-      (is (= 5 (count @rec/current-records)))
+      (is (= 6 (count @rec/current-records)))
       (is (every? #(= (set rec/record-keys)
                       (set (keys %)))
                   @rec/current-records))
-      (is #{"wart" "owl" "mordred" "gawain" "wizard"}
-          (set (map :last-name @rec/current-records)))))
+      (is (= #{"wart" "the-owl" "of-the-lake" "mordred" "gawain" "wizard"}
+             (set (map :last-name @rec/current-records))))))
   (testing "duplicate records should not alter the list"
     (let [file-to-parse "test/sample-comma-delimited.txt"]
       (rec/add-to-current-records! file-to-parse)
-      (is (= 5 (count @rec/current-records))))))
+      (is (= 6 (count @rec/current-records))))))
 
 (deftest t-get-sorted-records
+  (println @rec/current-records)
   (testing "view1 means sort by color and last name"
     (let [file-to-parse "test/sample-pipe-delimited.txt"]
       (rec/add-to-current-records! file-to-parse)
-      (is (= 5 (count @rec/current-records)))
+      (is (= 6 (count @rec/current-records)))
       (let [sorted-records (rec/get-sorted-records :view1)]
-        (is (= 5 (count sorted-records)))
-        (is (= ["mordred" "wizard" "the-owl" "gawain" "wart"]
+        (is (= 6 (count sorted-records)))
+        (is (= ["mordred" "wizard" "the-owl" "gawain" "of-the-lake" "wart"]
                (map :last-name sorted-records))))))
   (testing "view2 means sort by birth date only"
     (let [file-to-parse "test/sample-pipe-delimited.txt"]
       (rec/add-to-current-records! file-to-parse)
-      (is (= 5 (count @rec/current-records)))
+      (is (= 6 (count @rec/current-records)))
       (let [sorted-records (rec/get-sorted-records :view2)]
-        (is (= 5 (count sorted-records)))
-        (is (= ["the-owl" "gawain" "wart" "mordred" "wizard"]
+        (is (= 6 (count sorted-records)))
+        (is (= ["the-owl" "of-the-lake" "gawain" "wart" "mordred" "wizard"]
                (map :last-name sorted-records))))))
   (testing "view3 means sort by last-name"
     (let [file-to-parse "test/sample-pipe-delimited.txt"]
       (rec/add-to-current-records! file-to-parse)
-      (is (= 5 (count @rec/current-records)))
+      (is (= 6 (count @rec/current-records)))
       (let [sorted-records (rec/get-sorted-records :view3)]
-        (is (= 5 (count sorted-records)))
-        (is (= ["gawain" "mordred" "the-owl" "wart" "wizard"]
+        (is (= 6 (count sorted-records)))
+        (is (= ["gawain" "mordred" "of-the-lake" "the-owl" "wart" "wizard"]
                (map :last-name sorted-records)))))))
