@@ -94,11 +94,13 @@
   [sort-fn]
   (sort sort-fn @current-records))
 
+(def views->sorts
+  {:view1 color-then-last-name
+   :view2 birth-date
+   :view3 last-name})
+
 (defn get-sorted-records
   "Fetch a sorted list of current-records according to
   which view was requested."
   [view-type]
-  (condp = view-type
-    :view1 (sort-records color-then-last-name)
-    :view2 (sort-records birth-date)
-    :view3 (sort-records last-name)))
+  (sort-records (view-type views->sorts)))
