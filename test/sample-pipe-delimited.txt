@@ -1,5 +1,5 @@
 the-owl|archimedes|wise@owl.com|brown|287-04-06
-wart|arthur|king@england.co.uk|red|607-07-01
+Wart|Arthur|king@england.co.uk|red|607-07-01
 wizard|merlin|bermuda@backwards.com|blue|2467-01-01
-gawain|sir|knight@england.co.uk|green|602-12-10
+Gawain|Sir|knight@england.co.uk|Green|602-12-10
 mordred|sir|traitor@england.co.uk|black|627-12-31

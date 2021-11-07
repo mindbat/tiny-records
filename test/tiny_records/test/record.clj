@@ -1,5 +1,6 @@
 (ns tiny_records.test.record
   (:require [clojure.test :refer :all]
+            [java-time :as date]
             [tiny-records.record :as rec]))
 
 (deftest t-parse-record
@@ -8,22 +9,22 @@
             :first-name "archimedes"
             :email "wise@owl.com"
             :favorite-color "brown"
-            :date-of-birth "pinfeathers-and-gollyfluff"}
-           (rec/parse-record "owl|archimedes|wise@owl.com|brown|pinfeathers-and-gollyfluff"))))
+            :date-of-birth (date/local-date 1972 03 26)}
+           (rec/parse-record "owl|archimedes|wise@owl.com|brown|1972-03-26"))))
   (testing "should parse comma-delimited records"
     (is (= {:last-name "wart"
             :first-name "arthur"
             :email "king@england.co.uk"
             :favorite-color "red"
-            :date-of-birth "very-long-ago"}
-           (rec/parse-record "wart,arthur,king@england.co.uk,red,very-long-ago"))))
+            :date-of-birth (date/local-date 1975 06 23)}
+           (rec/parse-record "wart,arthur,king@england.co.uk,red,1975-06-23"))))
   (testing "should parse space-delimited records"
     (is (= {:last-name "wizard"
             :first-name "merlin"
             :email "bermuda@backwards.com"
             :favorite-color "blue"
-            :date-of-birth "start-of-time"}
-         (rec/parse-record "wizard merlin bermuda@backwards.com blue start-of-time")))))
+            :date-of-birth (date/local-date 2246 02 25)}
+         (rec/parse-record "wizard merlin bermuda@backwards.com blue 2246-02-25")))))
 
 (deftest t-parse-file
   (testing "should be able to parse pipe-delimited files"

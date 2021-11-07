@@ -1,17 +1,41 @@
 (ns tiny-records.record
   (:require [clojure.java.io :as io]
             [clojure.set :as set]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [java-time :as date]))
 
-(def record-keys [:last-name :first-name :email :favorite-color :date-of-birth])
+(def record-keys [:last-name :first-name :email
+                  :favorite-color :date-of-birth])
 
 (def current-records (atom #{}))
+
+(defn convert-incoming-to-date
+  "Function for converting the date-of-birth for a new record
+  into a local-date we can use later."
+  [incoming]
+  (apply date/local-date
+         (map #(Integer/parseInt %1)
+              (str/split incoming #"-"))))
+
+(defn normalize-record
+  "Normalize the format of the input record so we know
+  what's in the current-records atom."
+  [new-record]
+  (reduce-kv (fn [acc k v]
+               (if (= k :date-of-birth)
+                 (assoc acc k (convert-incoming-to-date v))
+                 (assoc acc k (str/lower-case v))))
+             {}
+             new-record))
 
 (defn parse-delimited-record
   "Given a field delimiter and a record string,
   return a record map."
   [delimiter record-line]
-  (zipmap record-keys (str/split record-line delimiter)))
+  (->> delimiter
+       (str/split record-line)
+       (zipmap record-keys)
+       normalize-record))
 
 (defn detect-delimiter
   "Discover which field delimiter this record is using."
