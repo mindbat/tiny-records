@@ -66,3 +66,29 @@
     (let [file-to-parse "test/sample-comma-delimited.txt"]
       (rec/add-to-current-records! file-to-parse)
       (is (= 5 (count @rec/current-records))))))
+
+(deftest t-get-sorted-records
+  (testing "view1 means sort by color and last name"
+    (let [file-to-parse "test/sample-pipe-delimited.txt"]
+      (rec/add-to-current-records! file-to-parse)
+      (is (= 5 (count @rec/current-records)))
+      (let [sorted-records (rec/get-sorted-records :view1)]
+        (is (= 5 (count sorted-records)))
+        (is (= ["mordred" "wizard" "the-owl" "gawain" "wart"]
+               (map :last-name sorted-records))))))
+  (testing "view2 means sort by birth date only"
+    (let [file-to-parse "test/sample-pipe-delimited.txt"]
+      (rec/add-to-current-records! file-to-parse)
+      (is (= 5 (count @rec/current-records)))
+      (let [sorted-records (rec/get-sorted-records :view2)]
+        (is (= 5 (count sorted-records)))
+        (is (= ["the-owl" "gawain" "wart" "mordred" "wizard"]
+               (map :last-name sorted-records))))))
+  (testing "view3 means sort by last-name"
+    (let [file-to-parse "test/sample-pipe-delimited.txt"]
+      (rec/add-to-current-records! file-to-parse)
+      (is (= 5 (count @rec/current-records)))
+      (let [sorted-records (rec/get-sorted-records :view3)]
+        (is (= 5 (count sorted-records)))
+        (is (= ["gawain" "mordred" "the-owl" "wart" "wizard"]
+               (map :last-name sorted-records)))))))

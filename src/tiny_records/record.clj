@@ -66,3 +66,39 @@
   the in-memory record list."
   [record-file]
   (swap! current-records set/union (set (parse-file record-file))))
+
+(defn color-then-last-name
+  "Comparator fn for sorting records by
+  color (asc) and last-name (asc)."
+  [record-1 record-2]
+  (or (compare (:favorite-color record-1)
+               (:favorite-color record-2))
+      (and (= (:favorite-color record-1)
+              (:favorite-color record-2))
+           (compare (:last-name record-1)
+                    (:last-name record-2)))))
+
+(defn birth-date
+  "Comparator fn for sorting records by dob asc."
+  [record-1 record-2]
+  (compare (:date-of-birth record-1)
+           (:date-of-birth record-2)))
+
+(defn last-name
+  "Comparator fn for sorting records by name desc."
+  [record-1 record-2]
+  (compare (:last-name record-1)
+           (:last-name record-2)))
+
+(defn sort-records
+  [sort-fn]
+  (sort sort-fn @current-records))
+
+(defn get-sorted-records
+  "Fetch a sorted list of current-records according to
+  which view was requested."
+  [view-type]
+  (condp = view-type
+    :view1 (sort-records color-then-last-name)
+    :view2 (sort-records birth-date)
+    :view3 (sort-records last-name)))
