@@ -74,7 +74,6 @@
       (is (= 6 (count @rec/current-records))))))
 
 (deftest t-get-sorted-records
-  (println @rec/current-records)
   (testing "view1 means sort by color and last name"
     (let [file-to-parse "test/sample-pipe-delimited.txt"]
       (rec/add-to-current-records! file-to-parse)
