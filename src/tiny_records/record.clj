@@ -99,6 +99,10 @@
    :view2 birth-date
    :view3 last-name})
 
+(defn valid-view?
+  [view-type]
+  (boolean (get views->sorts view-type false)))
+
 (defn get-sorted-records
   "Fetch a sorted list of current-records according to
   which view was requested."

@@ -1,5 +1,6 @@
 (ns tiny-records.core
   (:require [clojure.java.io :as io]
+            [clojure.tools.cli :as cli]
             [doric.core :as doric]
             [java-time :as date]
             [tiny-records.record :as rec])
@@ -11,6 +12,21 @@
   (.listFiles (io/file dir-path)
               (proxy [java.io.FilenameFilter] []
                 (accept [f, s] (.endsWith s ".txt")))))
+
+(defn valid-file?
+  [file-path]
+  (let [possible-file (io/file file-path)]
+    (and (.exists possible-file)
+         (.endsWith file-path ".txt"))))
+
+(defn valid-directory?
+  [dir-path]
+  (.exists (io/file dir-path)))
+
+(defn valid-file-or-directory?
+  [path]
+  (or (valid-file? path)
+      (valid-directory? path)))
 
 (defn process-directory!
   "Given a path to a directory, parse every txt file found
@@ -41,13 +57,46 @@
 
 (defn print-current-records
   [requested-view]
-  (assert (get rec/views->sorts requested-view false)
+  (assert (rec/valid-view? requested-view)
    "Requested view does not exist!")
   (println (doric/table rec/record-keys
                         (map format-date-for-output
                              (rec/get-sorted-records requested-view)))))
 
+(def cli-options
+  [["-h" "--help"]
+   ["-d" "--data PATH" "Path to directory or single file where the input data lives."
+    :validate [valid-file-or-directory?
+               "Must point to existing directory or .txt file!"]]
+   ["-o" "--output VIEW" "Which view to use for the data output: view1, view2, or view3?"
+    :parse-fn keyword
+    :validate [rec/valid-view? "Must be one of: view1, view2, or view3"]]])
+
+(defn print-help
+  [summary]
+  (println summary)
+  (System/exit 0))
+
+(defn print-errors
+  [errors]
+  (println "Some of the provided arguments had errors:")
+  (println (clojure.string/join "\n" errors))
+  (System/exit 1))
+
+(defn process-and-output
+  [data-path requested-view]
+  (if (.isFile (io/file data-path))
+    (process-file! data-path)
+    (process-directory! data-path))
+  (print-current-records requested-view)
+  (System/exit 0))
+
 (defn -main
-  "I don't do a whole lot ... yet."
+  "Kick off data processing after validating and parsing the cli args."
   [& args]
-  (println "Hello, World!"))
+  (let [{:keys [options arguments errors summary]}
+        (cli/parse-opts args cli-options)]
+    (cond
+      (:help options) (print-help summary)
+      (< 0 (count errors)) (print-errors errors)
+      :default (process-and-output (:data options) (:output options)))))
