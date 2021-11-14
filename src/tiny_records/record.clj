@@ -43,7 +43,8 @@
   (cond
     (.contains record-line "|") #"\|"
     (.contains record-line ",") #","
-    (.contains record-line " ") #"\s+"))
+    (.contains record-line " ") #"\s+"
+    :default nil))
 
 (defn parse-record
   "Convert a single line from a file of records
@@ -52,6 +53,11 @@
   (-> record-line
       detect-delimiter
       (parse-delimited-record record-line)))
+
+(defn valid-record?
+  [possible-record]
+  (and (seq possible-record)
+       (not (nil? (detect-delimiter possible-record)))))
 
 (defn parse-file
   "Given a file-path, read its contents, parse them into
