@@ -1,5 +1,6 @@
 (ns tiny-records.core
   (:require [clojure.java.io :as io]
+            [clojure.string :as str]
             [clojure.tools.cli :as cli]
             [doric.core :as doric]
             [java-time :as date]
@@ -79,13 +80,18 @@
 
 (defn print-help
   [summary]
+  (let [extra-help ["Welcome to Tiny Records!"
+                    "This application can be started in either web-server or cli mode"
+                    "To access web-server mode, run it with 'web' as the first argument:\n    ./tiny-records web --port [your-port-of-choice]"
+                    "Full list of options below:"]]
+    (println (str/join "\n\n" extra-help)))
   (println summary)
   (System/exit 0))
 
 (defn print-errors
   [errors]
   (println "Some of the provided arguments had errors:")
-  (println (clojure.string/join "\n" errors))
+  (println (str/join "\n" errors))
   (System/exit 1))
 
 (defn process-and-output
@@ -97,7 +103,8 @@
   (System/exit 0))
 
 (defn -main
-  "Kick off data processing after validating and parsing the cli args."
+  "Parse and validate the args, then kick off either the web server
+  or the cli data processing."
   [& args]
   (let [{:keys [options arguments errors summary]}
         (cli/parse-opts args cli-options)]
