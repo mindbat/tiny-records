@@ -1,8 +1,11 @@
 (ns tiny-records.core
   (:require [clojure.java.io :as io]
+            [clojure.string :as str]
             [clojure.tools.cli :as cli]
             [doric.core :as doric]
             [java-time :as date]
+            [ring.adapter.jetty :as ring-jetty]
+            [tiny-records.handler :as handler]
             [tiny-records.record :as rec])
   (:gen-class))
 
@@ -65,22 +68,30 @@
 
 (def cli-options
   [["-h" "--help"]
-   ["-d" "--data PATH" "Path to directory or single file where the input data lives."
+   ["-d" "--data PATH" "Path to directory or single file where the input data lives. (cli mode only)"
     :validate [valid-file-or-directory?
                "Must point to existing directory or .txt file!"]]
-   ["-o" "--output VIEW" "Which view to use for the data output: view1, view2, or view3?"
+   ["-o" "--output VIEW" "Which view to use for the data output: view1, view2, or view3? (cli mode only)"
     :parse-fn keyword
-    :validate [rec/valid-view? "Must be one of: view1, view2, or view3"]]])
+    :validate [rec/valid-view? "Must be one of: view1, view2, or view3"]]
+   ["-p" "--port PORT" "Port on which to start the web server (web mode only)"
+    :parse-fn #(Integer/parseInt %)
+    :default 3000]])
 
 (defn print-help
   [summary]
+  (let [extra-help ["Welcome to Tiny Records!"
+                    "This application can be started in either web-server or cli mode"
+                    "To access web-server mode, run it with 'web' as the first argument:\n    ./tiny-records web --port [your-port-of-choice]"
+                    "Full list of options below:"]]
+    (println (str/join "\n\n" extra-help)))
   (println summary)
   (System/exit 0))
 
 (defn print-errors
   [errors]
   (println "Some of the provided arguments had errors:")
-  (println (clojure.string/join "\n" errors))
+  (println (str/join "\n" errors))
   (System/exit 1))
 
 (defn process-and-output
@@ -92,11 +103,15 @@
   (System/exit 0))
 
 (defn -main
-  "Kick off data processing after validating and parsing the cli args."
+  "Parse and validate the args, then kick off either the web server
+  or the cli data processing."
   [& args]
   (let [{:keys [options arguments errors summary]}
         (cli/parse-opts args cli-options)]
     (cond
       (:help options) (print-help summary)
       (< 0 (count errors)) (print-errors errors)
+      (= "web" (first arguments)) (ring-jetty/run-jetty
+                                   handler/app
+                                   {:port (:port options)})
       :default (process-and-output (:data options) (:output options)))))
