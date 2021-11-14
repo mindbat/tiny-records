@@ -13,11 +13,11 @@
 
 (deftest t-process-directory
   (testing "should process all txt files"
-    (let [original-add rec/add-to-current-records!
+    (let [original-add rec/add-file-to-current-records!
           times-called (atom 0)]
-      (with-redefs [rec/add-to-current-records! (fn [arg]
-                                                  (swap! times-called inc)
-                                                  (original-add arg))]
+      (with-redefs [rec/add-file-to-current-records! (fn [arg]
+                                                       (swap! times-called inc)
+                                                       (original-add arg))]
         ;; spit a non-text file in there for checking
         (spit "test/nope.md" "nope|nope|nope|nope|nope")
         (is (.exists (io/file "test/nope.md")))
