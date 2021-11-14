@@ -8,7 +8,7 @@
   [req]
   (resp/response {:message "Server running"}))
 
-(defn wrap-json
+(defn wrap-json-body
   [handler]
   (fn [request]
     (let [response (handler request)]
@@ -18,8 +18,8 @@
 
 (defroutes app-routes
   (GET "/status" [] get-status)
-  (route/not-found {:message "Not Found"}))
+  (route/not-found (resp/not-found {:message "Not Found"})))
 
 (def app
   (-> app-routes
-      wrap-json))
+      wrap-json-body))
