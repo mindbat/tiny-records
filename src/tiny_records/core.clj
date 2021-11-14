@@ -3,6 +3,8 @@
             [clojure.tools.cli :as cli]
             [doric.core :as doric]
             [java-time :as date]
+            [ring.adapter.jetty :as ring-jetty]
+            [tiny-records.handler :as handler]
             [tiny-records.record :as rec])
   (:gen-class))
 
@@ -65,12 +67,15 @@
 
 (def cli-options
   [["-h" "--help"]
-   ["-d" "--data PATH" "Path to directory or single file where the input data lives."
+   ["-d" "--data PATH" "Path to directory or single file where the input data lives. (cli mode only)"
     :validate [valid-file-or-directory?
                "Must point to existing directory or .txt file!"]]
-   ["-o" "--output VIEW" "Which view to use for the data output: view1, view2, or view3?"
+   ["-o" "--output VIEW" "Which view to use for the data output: view1, view2, or view3? (cli mode only)"
     :parse-fn keyword
-    :validate [rec/valid-view? "Must be one of: view1, view2, or view3"]]])
+    :validate [rec/valid-view? "Must be one of: view1, view2, or view3"]]
+   ["-p" "--port PORT" "Port on which to start the web server (web mode only)"
+    :parse-fn #(Integer/parseInt %)
+    :default 3000]])
 
 (defn print-help
   [summary]
@@ -99,4 +104,7 @@
     (cond
       (:help options) (print-help summary)
       (< 0 (count errors)) (print-errors errors)
+      (= "web" (first arguments)) (ring-jetty/run-jetty
+                                   handler/app
+                                   {:port (:port options)})
       :default (process-and-output (:data options) (:output options)))))
