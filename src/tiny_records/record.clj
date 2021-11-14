@@ -43,7 +43,8 @@
   (cond
     (.contains record-line "|") #"\|"
     (.contains record-line ",") #","
-    (.contains record-line " ") #"\s+"))
+    (.contains record-line " ") #"\s+"
+    :default nil))
 
 (defn parse-record
   "Convert a single line from a file of records
@@ -53,6 +54,17 @@
       detect-delimiter
       (parse-delimited-record record-line)))
 
+(defn valid-record?
+  [possible-record]
+  (and (seq possible-record)
+       (not (nil? (detect-delimiter possible-record)))))
+
+(defn add-to-current-records!
+  [record-line]
+  (let [new-record (parse-record record-line)]
+    (swap! current-records conj new-record)
+    new-record))
+
 (defn parse-file
   "Given a file-path, read its contents, parse them into
   records, and return the list."
@@ -61,11 +73,18 @@
     (doall (for [line (line-seq rdr)]
              (parse-record line)))))
 
-(defn add-to-current-records!
+(defn add-file-to-current-records!
   "Add the contents of a file at the given file-path to
   the in-memory record list."
   [record-file]
   (swap! current-records set/union (set (parse-file record-file))))
+
+(defn format-date-for-output
+  "Format the date of a record for output to a user."
+  [record]
+  (update record
+          :date-of-birth
+          (partial date/format "M/d/YYYY")))
 
 (defn color-then-last-name
   "Comparator fn for sorting records by

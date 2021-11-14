@@ -58,10 +58,10 @@
       (is (= #{"wart" "the-owl" "of-the-lake" "mordred" "gawain" "wizard"}
              (set (map :last-name new-records)))))))
 
-(deftest t-add-to-current-records
+(deftest t-add-file-to-current-records
   (testing "should add file to current records"
     (let [file-to-parse "test/sample-pipe-delimited.txt"]
-      (rec/add-to-current-records! file-to-parse)
+      (rec/add-file-to-current-records! file-to-parse)
       (is (= 6 (count @rec/current-records)))
       (is (every? #(= (set rec/record-keys)
                       (set (keys %)))
@@ -70,13 +70,13 @@
              (set (map :last-name @rec/current-records))))))
   (testing "duplicate records should not alter the list"
     (let [file-to-parse "test/sample-comma-delimited.txt"]
-      (rec/add-to-current-records! file-to-parse)
+      (rec/add-file-to-current-records! file-to-parse)
       (is (= 6 (count @rec/current-records))))))
 
 (deftest t-get-sorted-records
   (testing "view1 means sort by color and last name"
     (let [file-to-parse "test/sample-pipe-delimited.txt"]
-      (rec/add-to-current-records! file-to-parse)
+      (rec/add-file-to-current-records! file-to-parse)
       (is (= 6 (count @rec/current-records)))
       (let [sorted-records (rec/get-sorted-records :view1)]
         (is (= 6 (count sorted-records)))
@@ -84,7 +84,7 @@
                (map :last-name sorted-records))))))
   (testing "view2 means sort by birth date only"
     (let [file-to-parse "test/sample-pipe-delimited.txt"]
-      (rec/add-to-current-records! file-to-parse)
+      (rec/add-file-to-current-records! file-to-parse)
       (is (= 6 (count @rec/current-records)))
       (let [sorted-records (rec/get-sorted-records :view2)]
         (is (= 6 (count sorted-records)))
@@ -92,7 +92,7 @@
                (map :last-name sorted-records))))))
   (testing "view3 means sort by last-name"
     (let [file-to-parse "test/sample-pipe-delimited.txt"]
-      (rec/add-to-current-records! file-to-parse)
+      (rec/add-file-to-current-records! file-to-parse)
       (is (= 6 (count @rec/current-records)))
       (let [sorted-records (rec/get-sorted-records :view3)]
         (is (= 6 (count sorted-records)))

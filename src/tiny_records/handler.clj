@@ -2,12 +2,24 @@
   (:require [cheshire.core :as json]
             [compojure.core :refer :all]
             [compojure.route :as route]
-            [ring.util.response :as resp]))
+            [ring.util.request :as req]
+            [ring.util.response :as resp]
+            [tiny-records.record :as rec]))
 
-(defn get-status
-  "Handler for checking status of the server."
-  [req]
-  (resp/response {:message "Server running"}))
+(defn is-json-request?
+  [request]
+  (= "application/json"
+     (req/content-type request)))
+
+(defn wrap-json-params
+  "Middleware to parse json-body requests into :params key."
+  [handler]
+  (fn [request]
+    (if (is-json-request? request)
+      (let [json-params (json/parse-string (req/body-string request)
+                                           true)]
+        (handler (assoc request :json-params json-params)))
+      (handler request))))
 
 (defn wrap-json-body
   "Middleware to coerce responses to json."
@@ -18,12 +30,28 @@
           (assoc-in [:headers "Content-Type"] "application/json")
           (update :body json/generate-string)))))
 
+(defn get-status
+  "Handler for checking status of the server."
+  [request]
+  (resp/response {:message "Server running"}))
+
+(defn create-record
+  "Handler for creating a new record based on a parsed request."
+  [record-line]
+  (if (rec/valid-record? record-line)
+    (let [new-record (rec/add-to-current-records! record-line)]
+      (resp/created "" (rec/format-date-for-output new-record)))
+    (resp/bad-request {:message "Must send a valid record in the body!"})))
+
 (defroutes app-routes
   "Defines all the routes for the rest api."
   (GET "/status" [] get-status)
+  (POST "/records" {{:keys [record-line]} :json-params}
+        (create-record record-line))
   (route/not-found (resp/not-found {:message "Not Found"})))
 
 (def app
   "This is the entrypoint for the web server."
   (-> app-routes
+      wrap-json-params
       wrap-json-body))

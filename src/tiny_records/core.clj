@@ -40,7 +40,7 @@
           "Directory does not exist!")
   (let [file-list (get-file-list dir-path)]
     (doseq [f file-list]
-      (rec/add-to-current-records! f))))
+      (rec/add-file-to-current-records! f))))
 
 (defn process-file!
   "Given a path to a file, parse it into records."
@@ -49,21 +49,14 @@
           "File does not exist!")
   (assert (.endsWith file-path ".txt")
             "File is wrong format!")
-  (rec/add-to-current-records! file-path))
-
-(defn format-date-for-output
-  "Format the date of a record for output to a user."
-  [record]
-  (update record
-          :date-of-birth
-          (partial date/format "M/d/YYYY")))
+  (rec/add-file-to-current-records! file-path))
 
 (defn print-current-records
   [requested-view]
   (assert (rec/valid-view? requested-view)
    "Requested view does not exist!")
   (println (doric/table rec/record-keys
-                        (map format-date-for-output
+                        (map rec/format-date-for-output
                              (rec/get-sorted-records requested-view)))))
 
 (def cli-options
