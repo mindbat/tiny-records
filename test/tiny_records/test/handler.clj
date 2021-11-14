@@ -3,6 +3,7 @@
             [cheshire.core :as json]
             [clj-http.client :as http]
             [tiny-records.handler :as handler]
+            [tiny-records.record :as rec]
             [ring.adapter.jetty :as ring-jetty]))
 
 (defmacro with-server [app options & body]
@@ -43,7 +44,10 @@
         (is (= 201
                (:status response)))
         (is (= "the-owl"
-               (:last-name response-body))))))
+               (:last-name response-body)))
+        (is (= 1 (count @rec/current-records)))
+        (is (= "the-owl"
+               (:last-name (first @rec/current-records)))))))
   (testing "should accept comma-delimited records"
     (with-server handler/app {:port 3000}
       (let [test-record "the-owl,archimedes,wise@owl.com,brown,287-04-06"
@@ -56,7 +60,10 @@
         (is (= 201
                (:status response)))
         (is (= "the-owl"
-               (:last-name response-body))))))
+               (:last-name response-body)))
+        (is (= 1 (count @rec/current-records)))
+        (is (= "the-owl"
+               (:last-name (first @rec/current-records)))))))
   (testing "should accept space-delimited records"
     (with-server handler/app {:port 3000}
       (let [test-record "the-owl archimedes wise@owl.com brown 287-04-06"
@@ -69,7 +76,10 @@
         (is (= 201
                (:status response)))
         (is (= "the-owl"
-               (:last-name response-body))))))
+               (:last-name response-body)))
+        (is (= 1 (count @rec/current-records)))
+        (is (= "the-owl"
+               (:last-name (first @rec/current-records)))))))
   (testing "should reject non-json bodies"
     (with-server handler/app {:port 3000}
       (let [response (http/post "http://localhost:3000/records"
