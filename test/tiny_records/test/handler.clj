@@ -3,19 +3,13 @@
             [cheshire.core :as json]
             [clj-http.client :as http]
             [clojure.java.io :as io]
+            [ring.adapter.jetty :as ring-jetty]
             [tiny-records.handler :as handler]
             [tiny-records.record :as rec]
-            [ring.adapter.jetty :as ring-jetty]))
-
-(defn reset-records!
-  []
-  (reset! rec/current-records #{}))
+            [tiny-records.test.common :as common]))
 
 (use-fixtures :each
-  (fn [f]
-    (reset-records!)
-    (when f
-      (f))))
+  common/reset-records-fixture)
 
 (defmacro with-server [app options & body]
   `(let [server# (ring-jetty/run-jetty ~app ~(assoc options :join? false))]
@@ -44,7 +38,7 @@
 
 (deftest t-create-record
   (testing "should accept pipe-delimited records"
-    (reset-records!)
+    (common/reset-records!)
     (with-server handler/app {:port 3000}
       (let [test-record "the-owl|archimedes|wise@owl.com|brown|287-04-06"
             test-body (json/generate-string {:record-line test-record})
@@ -61,7 +55,7 @@
         (is (= "the-owl"
                (:last-name (first @rec/current-records)))))))
   (testing "should accept comma-delimited records"
-    (reset-records!)
+    (common/reset-records!)
     (with-server handler/app {:port 3000}
       (let [test-record "the-owl,archimedes,wise@owl.com,brown,287-04-06"
             test-body (json/generate-string {:record-line test-record})
@@ -78,7 +72,7 @@
         (is (= "the-owl"
                (:last-name (first @rec/current-records)))))))
   (testing "should accept space-delimited records"
-    (reset-records!)
+    (common/reset-records!)
     (with-server handler/app {:port 3000}
       (let [test-record "the-owl archimedes wise@owl.com brown 287-04-06"
             test-body (json/generate-string {:record-line test-record})
