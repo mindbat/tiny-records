@@ -79,8 +79,9 @@
   [record-file]
   (swap! current-records set/union (set (parse-file record-file))))
 
-(defn format-date-for-output
-  "Format the date of a record for output to a user."
+(defn format-for-output
+  "Format a record for output to the user.
+  Atm, this means formatting the date field."
   [record]
   (update record
           :date-of-birth
@@ -136,4 +137,5 @@
   "Fetch a sorted list of current-records according to
   which view was requested."
   [view-type]
-  (sort-records (view-type views->sorts)))
+  (map format-for-output
+       (sort-records (view-type views->sorts))))
