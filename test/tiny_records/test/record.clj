@@ -96,5 +96,5 @@
       (is (= 6 (count @rec/current-records)))
       (let [sorted-records (rec/get-sorted-records :view3)]
         (is (= 6 (count sorted-records)))
-        (is (= ["gawain" "mordred" "of-the-lake" "the-owl" "wart" "wizard"]
+        (is (= ["wizard" "wart" "the-owl" "of-the-lake" "mordred" "gawain"]
                (map :last-name sorted-records)))))))

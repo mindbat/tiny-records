@@ -74,7 +74,7 @@
   (testing "check view3 printing"
     (let [printing (with-out-str (core/print-current-records :view3))
           first-entry (nth (str/split printing #"\n") 3)]
-      (is (.contains first-entry "gawain")
+      (is (.contains first-entry "wizard")
           "view3 prints in wrong order")
-      (is (.contains first-entry "12/10/0602")
+      (is (.contains first-entry "1/1/2467")
           "view3 prints dates in the wrong format"))))

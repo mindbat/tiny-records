@@ -86,28 +86,38 @@
           :date-of-birth
           (partial date/format "M/d/YYYY")))
 
+(defn flip
+  "Reverses a comparator. Useful for getting desc sort orders."
+  [result]
+  (* -1 result))
+
+(defn color
+  "Comparator fn for sorting records by color (asc)."
+  [record-1 record-2]
+  (compare (:favorite-color record-1)
+           (:favorite-color record-2)))
+
+(defn last-name
+  "Comparator fn for sorting records by name desc."
+  [record-1 record-2]
+  (flip (compare (:last-name record-1)
+                 (:last-name record-2))))
+
 (defn color-then-last-name
   "Comparator fn for sorting records by
   color (asc) and last-name (asc)."
   [record-1 record-2]
-  (or (compare (:favorite-color record-1)
-               (:favorite-color record-2))
-      (and (= (:favorite-color record-1)
-              (:favorite-color record-2))
-           (compare (:last-name record-1)
-                    (:last-name record-2)))))
+  (if (= (:favorite-color record-1)
+         (:favorite-color record-2))
+    (flip (last-name (:last-name record-1)
+                     (:last-name record-2)))
+    (color record-1 record-2)))
 
 (defn birth-date
   "Comparator fn for sorting records by dob asc."
   [record-1 record-2]
   (compare (:date-of-birth record-1)
            (:date-of-birth record-2)))
-
-(defn last-name
-  "Comparator fn for sorting records by name desc."
-  [record-1 record-2]
-  (compare (:last-name record-1)
-           (:last-name record-2)))
 
 (defn sort-records
   [sort-fn]
