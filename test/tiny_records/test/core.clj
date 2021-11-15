@@ -3,13 +3,11 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [tiny-records.core :as core]
-            [tiny-records.record :as rec]))
+            [tiny-records.record :as rec]
+            [tiny-records.test.common :as common]))
 
 (use-fixtures :each
-  (fn [f]
-    (reset! rec/current-records #{})
-    (when f
-      (f))))
+  common/reset-records-fixture)
 
 (deftest t-process-directory
   (testing "should process all txt files"

@@ -1,13 +1,11 @@
 (ns tiny_records.test.record
   (:require [clojure.test :refer :all]
             [java-time :as date]
-            [tiny-records.record :as rec]))
+            [tiny-records.record :as rec]
+            [tiny-records.test.common :as common]))
 
 (use-fixtures :each
-  (fn [f]
-    (reset! rec/current-records #{})
-    (when f
-      (f))))
+  common/reset-records-fixture)
 
 (deftest t-parse-record
   (testing "should parse pipe-delimited records"
