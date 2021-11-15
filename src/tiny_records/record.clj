@@ -120,10 +120,6 @@
   (compare (:date-of-birth record-1)
            (:date-of-birth record-2)))
 
-(defn sort-records
-  [sort-fn]
-  (sort sort-fn @current-records))
-
 (def views->sorts
   {:view1 color-then-last-name
    :view2 birth-date
@@ -133,9 +129,15 @@
   [view-type]
   (boolean (get views->sorts view-type false)))
 
-(defn get-sorted-records
+(defn get-sorted-records-by-view
   "Fetch a sorted list of current-records according to
   which view was requested."
   [view-type]
   (map format-for-output
-       (sort-records (view-type views->sorts))))
+       (sort (view-type views->sorts) @current-records)))
+
+(defn get-sorted-records-by-field
+  "Fetch a list of current-records sorted by single field."
+  [field-name]
+  (map format-for-output
+       (sort-by field-name @current-records)))

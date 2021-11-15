@@ -56,7 +56,7 @@
   (assert (rec/valid-view? requested-view)
    "Requested view does not exist!")
   (println (doric/table rec/record-keys
-                        (rec/get-sorted-records requested-view))))
+                        (rec/get-sorted-records-by-view requested-view))))
 
 (def cli-options
   [["-h" "--help"]
