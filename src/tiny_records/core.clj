@@ -60,21 +60,21 @@
 
 (def cli-options
   [["-h" "--help"]
-   ["-d" "--data PATH" "Path to directory or single file where the input data lives. (cli mode only)"
+   ["-d" "--data PATH" "Path to directory or single file where the input data lives. (cli-mode only)"
     :validate [valid-file-or-directory?
                "Must point to existing directory or .txt file!"]]
-   ["-o" "--output VIEW" "Which view to use for the data output: view1, view2, or view3? (cli mode only)"
+   ["-o" "--output VIEW" "Which view to use for the data output: view1, view2, or view3? (cli-mode only)"
     :parse-fn keyword
     :validate [rec/valid-view? "Must be one of: view1, view2, or view3"]]
-   ["-p" "--port PORT" "Port on which to start the web server (web mode only)"
+   ["-p" "--port PORT" "Port on which to start the web server (web-mode only)"
     :parse-fn #(Integer/parseInt %)
     :default 3000]])
 
 (defn print-help
   [summary]
   (let [extra-help ["Welcome to Tiny Records!"
-                    "This application can be started in either web-server or cli mode"
-                    "To access web-server mode, run it with 'web' as the first argument:\n    ./tiny-records web --port [your-port-of-choice]"
+                    "This application can be started in either web-mode or cli-mode"
+                    "To access web-mode, run it with 'web' as the first argument:\n    ./tiny-records web --port [your-port-of-choice]"
                     "Full list of options below:"]]
     (println (str/join "\n\n" extra-help)))
   (println summary)
