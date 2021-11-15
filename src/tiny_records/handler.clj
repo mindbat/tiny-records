@@ -43,27 +43,16 @@
       (resp/created "" (rec/format-for-output new-record)))
     (resp/bad-request {:message "Must send a valid record in the body!"})))
 
-(defn fetch-sorted-records
-  "Convenience fn for getting a list of sorted records."
-  [sorting-field]
-  (cond
-    (= :color sorting-field) (map rec/format-for-output
-                                  (rec/sort-records rec/color))
-    (= :birthdate sorting-field) (rec/get-sorted-records :view2)
-    (= :last-name sorting-field) (map rec/format-for-output
-                                      (rec/sort-records
-                                       (comp rec/flip
-                                             rec/last-name)))))
-
 (defn get-current-records
   "Get a list of the current records sorted by a single field."
   [sorting-field]
-  (resp/response {:records (fetch-sorted-records sorting-field)}))
+  (resp/response {:records (rec/get-sorted-records-by-field
+                            sorting-field)}))
 
 (defroutes app-routes
   "Defines all the routes for the rest api."
-  (GET "/records/color" [] (get-current-records :color))
-  (GET "/records/birthdate" [] (get-current-records :birthdate))
+  (GET "/records/color" [] (get-current-records :favorite-color))
+  (GET "/records/birthdate" [] (get-current-records :date-of-birth))
   (GET "/records/name" [] (get-current-records :last-name))
   (POST "/records" {{:keys [record-line]} :json-params}
         (create-record record-line))
