@@ -78,7 +78,7 @@
     (let [file-to-parse "test/sample-pipe-delimited.txt"]
       (rec/add-file-to-current-records! file-to-parse)
       (is (= 6 (count @rec/current-records)))
-      (let [sorted-records (rec/get-sorted-records :view1)]
+      (let [sorted-records (rec/get-sorted-records-by-view :view1)]
         (is (= 6 (count sorted-records)))
         (is (= ["mordred" "wizard" "the-owl" "gawain" "of-the-lake" "wart"]
                (map :last-name sorted-records))))))
@@ -86,7 +86,7 @@
     (let [file-to-parse "test/sample-pipe-delimited.txt"]
       (rec/add-file-to-current-records! file-to-parse)
       (is (= 6 (count @rec/current-records)))
-      (let [sorted-records (rec/get-sorted-records :view2)]
+      (let [sorted-records (rec/get-sorted-records-by-view :view2)]
         (is (= 6 (count sorted-records)))
         (is (= ["the-owl" "of-the-lake" "gawain" "wart" "mordred" "wizard"]
                (map :last-name sorted-records))))))
@@ -94,7 +94,7 @@
     (let [file-to-parse "test/sample-pipe-delimited.txt"]
       (rec/add-file-to-current-records! file-to-parse)
       (is (= 6 (count @rec/current-records)))
-      (let [sorted-records (rec/get-sorted-records :view3)]
+      (let [sorted-records (rec/get-sorted-records-by-view :view3)]
         (is (= 6 (count sorted-records)))
         (is (= ["wizard" "wart" "the-owl" "of-the-lake" "mordred" "gawain"]
                (map :last-name sorted-records)))))))

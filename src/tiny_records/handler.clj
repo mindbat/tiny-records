@@ -40,14 +40,23 @@
   [record-line]
   (if (rec/valid-record? record-line)
     (let [new-record (rec/add-to-current-records! record-line)]
-      (resp/created "" (rec/format-date-for-output new-record)))
+      (resp/created "" (rec/format-for-output new-record)))
     (resp/bad-request {:message "Must send a valid record in the body!"})))
+
+(defn get-current-records
+  "Get a list of the current records sorted by a single field."
+  [sorting-field]
+  (resp/response {:records (rec/get-sorted-records-by-field
+                            sorting-field)}))
 
 (defroutes app-routes
   "Defines all the routes for the rest api."
-  (GET "/status" [] get-status)
+  (GET "/records/color" [] (get-current-records :favorite-color))
+  (GET "/records/birthdate" [] (get-current-records :date-of-birth))
+  (GET "/records/name" [] (get-current-records :last-name))
   (POST "/records" {{:keys [record-line]} :json-params}
         (create-record record-line))
+  (GET "/status" [] get-status)
   (route/not-found (resp/not-found {:message "Not Found"})))
 
 (def app

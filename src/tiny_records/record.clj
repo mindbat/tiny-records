@@ -79,8 +79,9 @@
   [record-file]
   (swap! current-records set/union (set (parse-file record-file))))
 
-(defn format-date-for-output
-  "Format the date of a record for output to a user."
+(defn format-for-output
+  "Format a record for output to the user.
+  Atm, this means formatting the date field."
   [record]
   (update record
           :date-of-birth
@@ -119,10 +120,6 @@
   (compare (:date-of-birth record-1)
            (:date-of-birth record-2)))
 
-(defn sort-records
-  [sort-fn]
-  (sort sort-fn @current-records))
-
 (def views->sorts
   {:view1 color-then-last-name
    :view2 birth-date
@@ -132,8 +129,15 @@
   [view-type]
   (boolean (get views->sorts view-type false)))
 
-(defn get-sorted-records
+(defn get-sorted-records-by-view
   "Fetch a sorted list of current-records according to
   which view was requested."
   [view-type]
-  (sort-records (view-type views->sorts)))
+  (map format-for-output
+       (sort (view-type views->sorts) @current-records)))
+
+(defn get-sorted-records-by-field
+  "Fetch a list of current-records sorted by single field."
+  [field-name]
+  (map format-for-output
+       (sort-by field-name @current-records)))
