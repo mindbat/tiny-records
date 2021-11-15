@@ -2,9 +2,20 @@
   (:require [clojure.test :refer :all]
             [cheshire.core :as json]
             [clj-http.client :as http]
+            [clojure.java.io :as io]
             [tiny-records.handler :as handler]
             [tiny-records.record :as rec]
             [ring.adapter.jetty :as ring-jetty]))
+
+(defn reset-records!
+  []
+  (reset! rec/current-records #{}))
+
+(use-fixtures :each
+  (fn [f]
+    (reset-records!)
+    (when f
+      (f))))
 
 (defmacro with-server [app options & body]
   `(let [server# (ring-jetty/run-jetty ~app ~(assoc options :join? false))]
@@ -33,6 +44,7 @@
 
 (deftest t-create-record
   (testing "should accept pipe-delimited records"
+    (reset-records!)
     (with-server handler/app {:port 3000}
       (let [test-record "the-owl|archimedes|wise@owl.com|brown|287-04-06"
             test-body (json/generate-string {:record-line test-record})
@@ -49,6 +61,7 @@
         (is (= "the-owl"
                (:last-name (first @rec/current-records)))))))
   (testing "should accept comma-delimited records"
+    (reset-records!)
     (with-server handler/app {:port 3000}
       (let [test-record "the-owl,archimedes,wise@owl.com,brown,287-04-06"
             test-body (json/generate-string {:record-line test-record})
@@ -65,6 +78,7 @@
         (is (= "the-owl"
                (:last-name (first @rec/current-records)))))))
   (testing "should accept space-delimited records"
+    (reset-records!)
     (with-server handler/app {:port 3000}
       (let [test-record "the-owl archimedes wise@owl.com brown 287-04-06"
             test-body (json/generate-string {:record-line test-record})
@@ -112,3 +126,43 @@
                (:status response)))
         (is (= "Must send a valid record in the body!"
                (:message (json/parse-string (:body response) true))))))))
+
+(deftest t-get-current-records
+  (with-server handler/app {:port 3000}
+    ;; load up our current records
+    (with-open [rdr (io/reader "test/sample-pipe-delimited.txt")]
+      (doseq [line (line-seq rdr)]
+        (http/post "http://localhost:3000/records"
+                   {:throw-exceptions false
+                    :content-type :json
+                    :body (json/generate-string {:record-line line})})))
+    (testing "should be able to fetch by color"
+      (let [response (http/get "http://localhost:3000/records/color")
+            response-body (json/parse-string (:body response)
+                                             true)]
+        (is (= 200
+               (:status response)))
+        (is (= 6
+               (count (:records response-body))))
+        (is (= ["mordred" "wizard" "the-owl" "gawain" "of-the-lake" "wart"]
+               (map :last-name (:records response-body))))))
+    (testing "should be able to fetch by birthdate"
+      (let [response (http/get "http://localhost:3000/records/birthdate")
+            response-body (json/parse-string (:body response)
+                                             true)]
+        (is (= 200
+               (:status response)))
+        (is (= 6
+               (count (:records response-body))))
+        (is (= ["the-owl" "of-the-lake" "gawain" "wart" "mordred" "wizard"]
+               (map :last-name (:records response-body))))))
+    (testing "should be able to fetch by last name"
+      (let [response (http/get "http://localhost:3000/records/name")
+            response-body (json/parse-string (:body response)
+                                             true)]
+        (is (= 200
+               (:status response)))
+        (is (= 6
+               (count (:records response-body))))
+        (is (= ["gawain" "mordred" "of-the-lake" "the-owl" "wart" "wizard"]
+               (map :last-name (:records response-body))))))))
